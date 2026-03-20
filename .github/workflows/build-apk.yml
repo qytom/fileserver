@@ -11,10 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
-    env:
-      ANDROID_SDK_ROOT: ~/.buildozer/android/platform/android-sdk
-      ANDROID_HOME: ~/.buildozer/android/platform/android-sdk
-    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -52,10 +48,44 @@ jobs:
           cmake \
           libltdl-dev
         
-    - name: Build APK
+    - name: Setup Android SDK
       run: |
+        # Create Android SDK directory
+        mkdir -p ~/.buildozer/android/platform/android-sdk
+        
+        # Download and install Android SDK Command Line Tools
+        cd ~/.buildozer/android/platform/android-sdk
+        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip commandlinetools-linux-11076708_latest.zip
+        rm commandlinetools-linux-11076708_latest.zip
+        
+        # Set up SDK tools directory structure
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/bin cmdline-tools/latest/
+        mv cmdline-tools/lib cmdline-tools/latest/
+        
+        # Set environment variables
         export ANDROID_SDK_ROOT=~/.buildozer/android/platform/android-sdk
         export ANDROID_HOME=~/.buildozer/android/platform/android-sdk
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+        
+        # Accept SDK licenses
+        yes | sdkmanager --licenses
+        
+        # Install build-tools
+        sdkmanager "build-tools;33.0.0"
+        
+        # Verify installation
+        ls -la $ANDROID_SDK_ROOT/build-tools/
+        
+    - name: Build APK
+      run: |
+        # Set environment variables
+        export ANDROID_SDK_ROOT=~/.buildozer/android/platform/android-sdk
+        export ANDROID_HOME=~/.buildozer/android/platform/android-sdk
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+        
+        # Build APK
         buildozer android debug 2>&1 | tee build.log
         echo "Build completed with exit code: $?"
         
