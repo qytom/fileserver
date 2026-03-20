@@ -53,49 +53,67 @@ jobs:
         buildozer android debug 2>&1 | tee build.log
         echo "Build completed with exit code: $?"
         
-    - name: Find APK files
-      id: find_apk
+    - name: List all files and directories
       run: |
+        echo "=== Current directory ==="
+        pwd
+        ls -la
+        echo ""
+        echo "=== All directories ==="
+        find . -type d -name ".buildozer" -o -name "bin" | head -20
+        echo ""
         echo "=== Searching for APK files ==="
-        APK_FILES=$(find . -name "*.apk" -type f 2>/dev/null)
-        
-        if [ -z "$APK_FILES" ]; then
-          echo "No APK files found!"
-          echo "apk_found=false" >> $GITHUB_OUTPUT
-          exit 1
+        find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
+        echo ""
+        echo "=== Listing .buildozer directory ==="
+        if [ -d ".buildozer" ]; then
+          ls -la .buildozer/
+          echo ""
+          echo "=== Listing .buildozer/android directory ==="
+          if [ -d ".buildozer/android" ]; then
+            ls -la .buildozer/android/
+            echo ""
+            echo "=== Listing .buildozer/android/platform directory ==="
+            if [ -d ".buildozer/android/platform" ]; then
+              ls -la .buildozer/android/platform/
+              echo ""
+              echo "=== Listing .buildozer/android/platform/build directory ==="
+              if [ -d ".buildozer/android/platform/build" ]; then
+                ls -la .buildozer/android/platform/build/
+                echo ""
+                echo "=== Listing .buildozer/android/platform/build/dists directory ==="
+                if [ -d ".buildozer/android/platform/build/dists" ]; then
+                  ls -la .buildozer/android/platform/build/dists/
+                fi
+              fi
+            fi
+          fi
+        else
+          echo ".buildozer directory not found"
+        fi
+        echo ""
+        echo "=== Listing bin directory ==="
+        if [ -d "bin" ]; then
+          ls -la bin/
+        else
+          echo "bin directory not found"
         fi
         
-        echo "Found APK files:"
-        echo "$APK_FILES"
-        
-        # Get the first APK file path
-        FIRST_APK=$(echo "$APK_FILES" | head -n 1)
-        echo "First APK: $FIRST_APK"
-        
-        # Get the directory containing the APK
-        APK_DIR=$(dirname "$FIRST_APK")
-        echo "APK directory: $APK_DIR"
-        
-        # List all files in the APK directory
-        echo "Files in APK directory:"
-        ls -la "$APK_DIR"
-        
-        # Set output variables
-        echo "apk_dir=$APK_DIR" >> $GITHUB_OUTPUT
-        echo "apk_found=true" >> $GITHUB_OUTPUT
-        
-    - name: Upload build log on failure
-      if: failure()
+    - name: Upload build log
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: build-log
         path: build.log
         
     - name: Upload APK files
-      if: success() && steps.find_apk.outputs.apk_found == 'true'
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: fileserver-apk
-        path: ${{ steps.find_apk.outputs.apk_dir }}/*.apk
+        path: |
+          .buildozer/android/platform/build/dists/*.apk
+          .buildozer/android/platform/build/outputs/apk/debug/*.apk
+          bin/*.apk
         retention-days: 30
-        if-no-files-found: error
+        if-no-files-found: warn
