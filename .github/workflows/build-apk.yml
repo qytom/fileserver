@@ -50,18 +50,42 @@ jobs:
           libffi-dev \
           libltdl-dev
         
+    - name: Debug - List files
+      run: |
+        echo "Current directory:"
+        pwd
+        echo ""
+        echo "Files in current directory:"
+        ls -la
+        echo ""
+        echo "Checking buildozer.spec:"
+        if [ -f buildozer.spec ]; then
+          echo "buildozer.spec exists"
+          head -n 20 buildozer.spec
+        else
+          echo "buildozer.spec NOT found!"
+        fi
+        
     - name: Build APK
       run: |
-        buildozer android debug
+        buildozer android debug 2>&1 | tee build.log
+        
+    - name: Upload build log on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-log
+        path: build.log
         
     - name: Upload APK
+      if: success()
       uses: actions/upload-artifact@v3
       with:
         name: fileserver-apk
         path: bin/*.apk
         
     - name: Create Release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
         files: bin/*.apk
