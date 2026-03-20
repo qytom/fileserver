@@ -347,6 +347,8 @@ android.ndk_mirror = https://mirrors.tuna.tsinghua.edu.cn/android/repository/
 # (str) Android Gradle mirror
 android.gradle_mirror = https://mirrors.tuna.tsinghua.edu.cn/gradle/
 
+# Trigger new build
+
 # (bool) Use the Buildozer Docker image (auto-detects if docker is available)
 # use_docker = False
 
