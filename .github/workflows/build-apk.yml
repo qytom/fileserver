@@ -11,6 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    env:
+      ANDROID_SDK_ROOT: ~/.buildozer/android/platform/android-sdk
+      ANDROID_HOME: ~/.buildozer/android/platform/android-sdk
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -48,13 +52,10 @@ jobs:
           cmake \
           libltdl-dev
         
-    - name: Accept Android SDK licenses
-      run: |
-        mkdir -p ~/.buildozer/android/platform/android-sdk
-        yes | ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses || true
-        
     - name: Build APK
       run: |
+        export ANDROID_SDK_ROOT=~/.buildozer/android/platform/android-sdk
+        export ANDROID_HOME=~/.buildozer/android/platform/android-sdk
         buildozer android debug 2>&1 | tee build.log
         echo "Build completed with exit code: $?"
         
