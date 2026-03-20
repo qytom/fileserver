@@ -45,9 +45,7 @@ jobs:
           pkg-config \
           libncurses5-dev \
           libncursesw5-dev \
-          libtinfo5 \
           cmake \
-          libffi-dev \
           libltdl-dev
         
     - name: Debug - List files
