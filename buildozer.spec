@@ -110,9 +110,6 @@ android.api = 33
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
-# (int) Android SDK version to use
-android.sdk = 33
-
 # (str) Android NDK version to use
 android.ndk = 25b
 
@@ -138,7 +135,7 @@ android.ndk_api = 21
 
 # (bool) If True, then automatically accept SDK license
 # agreements. This is intended for automation only. If set to False, 
-# the default, you will be shown the license when first running
+# default, you will be shown the license when first running
 # buildozer.
 # android.accept_sdk_license = False
 
@@ -149,15 +146,15 @@ android.ndk_api = 21
 # use that parameter together with android.entrypoint to set custom Java class instead of PythonActivity
 #android.activity_class_name =
 
-# (str) Extra xml to write directly inside the <manifest> element of AndroidManifest.xml
+# (str) Extra xml to write directly inside of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML code
 #android.extra_manifest_xml =
 
-# (str) Extra xml to write directly inside the <application> element of AndroidManifest.xml
+# (str) Extra xml to write directly inside of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML arguments:
 #android.extra_manifest_application_xml =
 
-# (str) Full name including package path of the Java class that implements Python Service
+# (str) Full name including package path of the Java class that extends Python Service
 # use that parameter to set custom Java class which extends PythonService
 #android.service_class_name =
 
@@ -176,7 +173,7 @@ android.ndk_api = 21
 # (list) List of Java .jar files to add to the libs so that pyjnius can access it
 #android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
 
-# (list) List of Java files to add to the android project (can be java or a directory containing the files)
+# (list) List of Java files to add to the android project (can be java or a directory containing files)
 #android.add_src = 
 
 # (list) Android AAR archives to add
@@ -184,191 +181,16 @@ android.ndk_api = 21
 
 # (list) Put these files or directories in the apk assets directory. 
 # Either form may be used, and assets need not be in 'source.include_exts'.
-# 1) A directory name to add its content
+#1) A directory name to add its content
 #android.add_assets = directory/path/
-# 2) A file path
+#2) A file path
 #android.add_assets = source/file.ext
 
 # (list) Put these files or directories in the apk res directory. 
-# The option may be used in three ways, the value may contain one or more comma separated paths:
-# 1) A directory name to add its content. 
+# The option may be used in three ways, and the value may contain one or more comma separated paths:
+#1) A directory name to add its content. 
 #android.add_resources = directory/path/
-# 2) A file path, 
+#2) A file path, 
 #android.add_resources = source/file.ext
-# 3) A directory path and a target directory name
+#3) A directory path and a target directory name
 #android.add_resources = source/directory/path:destination/directory/path
-
-# (list) Gradle dependencies to add
-#android.gradle_dependencies =
-
-# (bool) Enable AndroidX support. Enable when 'android.api' is 28 or higher.
-#android.enable_androidx = True
-
-# (list) add java compile options
-# this can for example be necessary when importing certain java libraries using the 'android.gradle_dependencies'
-# see https://developer.android.com/studio/write/java8-support for further information
-# android.add_compile_options = "-Xlint:deprecation"
-
-# (list) Gradle repositories to add {can be necessary for some android.gradle_dependencies}
-# please enclose in double quotes
-#android.gradle_repositories = "https://maven.google.com/"
-
-# (list) packaging options to add
-# see https://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.PackagingOptions.html
-# can be necessary to solve conflicts in gradle dependencies
-# android.add_packaging_options = "exclude 'META-INF/common.kotlin_module'"
-# android.add_packaging_options = "exclude 'META-INF/*.kotlin_module'"
-
-# (list) Java classes to add as activities to the manifest.
-#android.add_activities =
-
-# (str) OUYA Console category. Should be one of GAME or APP
-# If you leave this blank, OUYA support will not be enabled
-#android.ouya.category =
-
-# (str) Filename of OUYA Console icon. It must be a 732x412 png image.
-#android.ouya.icon =
-
-# (str) XML file to include as an intent filters in <activity> tag
-#android.manifest.intent_filters =
-
-# (str) launchMode to set for the main activity
-#android.manifest.launch_mode = standard
-
-# (list) Android additional libraries to copy into libs/armeabi
-#android.add_libs_armeabi = libs/android/*.so
-#android.add_libs_armeabi_v7a = libs/android-v7/*.so
-#android.add_libs_arm64_v8a = libs/android-v8/*.so
-#android.add_libs_x86 = libs/android-x86/*.so
-#android.add_libs_mips = libs/android-mips/*.so
-
-# (bool) Indicate whether the screen should stay on
-# Don't forget to add the WAKE_LOCK permission if you set this to True
-#android.wakelock = False
-
-# (list) Android application meta-data to set (key=value format)
-#android.meta_data =
-
-# (list) Android library project to add (will be added in the 
-# project.properties automatically.)
-#android.library_references =
-
-# (list) Android shared libraries which will be added to AndroidManifest.xml using <uses-library> tag
-#android.uses_library =
-
-# (str) Android logcat filters to use
-#android.logcat_filters = *:S python:D
-
-# (bool) Copy library instead of making a libpymodules.so
-#android.copy_libs = 1
-
-# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
-android.arch = armeabi-v7a
-
-# (int) overrides automatic versionCode computation (used in build.gradle)
-# this is not the same as app version and should only be edited if you know what you're doing
-# android.numeric_version = 1
-
-#
-# Python for android (p4a) specific
-#
-
-# (str) python-for-android fork to use, defaults to upstream (kivy)
-#p4a.source = kivy
-
-# (str) python-for-android branch to use, defaults to master
-#p4a.branch = master
-
-# (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
-#p4a.dir =
-
-# (str) python-for-android recipe directory (if empty, the default recipe dir will be used)
-#p4a.recipes_dir =
-
-# (str) python-for-android bootstraps to use
-# p4a.bootstraps = sdl2
-
-# (int) port number to specify an explicit --port= p4a argument (eg for bootstrap flask)
-#p4a.port = 
-
-# Control passing the --use-setup-py vs --ignore-setup-py to p4a
-# 'infer' will set it to True if there's a setup.py in the root directory
-# and False otherwise
-#p4a.setup_py = infer
-
-# (str) extra command line arguments to pass when invoking pythonforandroid.toolchain
-#p4a.extra_args =
-
-#
-# iOS specific
-#
-
-# (str) Path to a custom kivy_ios directory
-#ios.kivy_ios_dir = ../kivy-ios
-# Alternately, specify the URL and branch of a git checkout:
-#ios.kivy_ios_url = https://github.com/kivy/kivy-ios
-#ios.kivy_ios_branch = master
-
-# (str) Name of the certificate to use for signing the debug version
-# Get a list of available certificates: buildozer ios list_identities
-#ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
-
-# (str) Name of the certificate to use for signing the release version
-#ios.codesign.release = %(ios.codesign.debug)s
-
-[buildozer]
-
-# (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 2
-
-# (int) Display warning if buildozer is run as root (0 = False, 1 = True)
-warn_on_root = 1
-
-#
-# Xcode specific
-#
-
-# (str) Xcode project version
-#ios.xcode_version = 10.1
-
-# (str) Xcode Build Tools version
-#ios.xcode_build_tools = 10.1
-
-# (str) The path to the ios-deploy tool
-#ios.ios_deploy = 
-
-# (bool) Use the Xcode legacy build system instead of the new one
-#ios.legacy_build = False
-
-#
-# Android specific
-#
-
-# (int) How much memory to allocate to the Gradle daemon.
-# Default is 256MB, increase this if gradle complains about memory.
-#android.gradle_memory = 256m
-
-# (bool) Gradle should build in offline mode (no network access)
-#android.gradle_offline = False
-
-# (bool) Gradle should download dependencies on demand (recommended)
-#android.gradle_daemon = True
-
-# (bool) Automatically accept SDK license
-#android.accept_sdk_license = False
-
-#
-# Travis CI specific
-#
-
-# (str) The set of Travis CI services to use (comma-separated list)
-#travis.services = docker
-
-# (str) Travis CI docker image to use
-#travis.image = kivy/buildozer
-
-# (str) Travis CI cache directory
-#travis.cache_dir = 
-
-# (bool) Travis CI should clone the repository as shallow clone
-#travis.shallow_clone = False

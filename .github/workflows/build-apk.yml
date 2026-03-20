@@ -52,6 +52,20 @@ jobs:
       run: |
         buildozer android debug 2>&1 | tee build.log
         
+    - name: List all files and directories
+      run: |
+        echo "=== Current directory structure ==="
+        ls -la
+        echo ""
+        echo "=== Searching for APK files ==="
+        find . -name "*.apk" -type f -exec ls -lh {} \; 2>/dev/null || echo "No APK files found"
+        echo ""
+        echo "=== Listing .buildozer directory ==="
+        ls -la .buildozer/ 2>/dev/null || echo ".buildozer directory not found"
+        echo ""
+        echo "=== Listing .buildozer/android directory ==="
+        ls -la .buildozer/android/ 2>/dev/null || echo ".buildozer/android directory not found"
+        
     - name: Upload build log on failure
       if: failure()
       uses: actions/upload-artifact@v4
@@ -59,10 +73,13 @@ jobs:
         name: build-log
         path: build.log
         
-    - name: Upload all APK files
+    - name: Upload APK files
       if: success()
       uses: actions/upload-artifact@v4
       with:
         name: fileserver-apk
         path: |
-          **/*.apk
+          .buildozer/android/platform/build/dists/*.apk
+          .buildozer/android/platform/build/outputs/apk/debug/*.apk
+          bin/*.apk
+        retention-days: 30
