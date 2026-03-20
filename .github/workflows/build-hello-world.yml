@@ -35,26 +35,35 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y git openjdk-11-jdk build-essential python3-dev python3-pip libffi-dev libssl-dev libxml2-dev libxslt1-dev zlib1g-dev autoconf libtool pkg-config libncurses5-dev libncursesw5-dev cmake libltdl-dev
         
+    - name: Create Hello World directory
+      run: |
+        mkdir -p hello_world
+        cp hello_main.py hello_world/main.py
+        
     - name: Build APK with Buildozer
       run: |
-        # Use a simpler build approach
+        cd hello_world
+        # Initialize buildozer
         buildozer init
         # Configure buildozer.spec
         sed -i 's/orientation = all/orientation = landscape/g' buildozer.spec
         sed -i 's/requirements = python3,kivy/requirements = python3,kivy==2.1.0/g' buildozer.spec
+        # Show configuration
+        cat buildozer.spec
         # Build with verbose output
         buildozer android debug -v 2>&1 | tee build.log
         
     - name: List files
       run: |
         ls -la
-        find . -name "*.apk" -type f
+        ls -la hello_world/
+        find hello_world -name "*.apk" -type f
         
     - name: Upload build artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: build-artifacts
+        name: hello-world-build-artifacts
         path: |
-          build.log
-          **/*.apk
+          hello_world/build.log
+          hello_world/**/*.apk
