@@ -11,6 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    env:
+      ANDROID_SDK_ROOT: /home/runner/android-sdk
+      ANDROID_HOME: /home/runner/android-sdk
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -51,10 +55,10 @@ jobs:
     - name: Setup Android SDK
       run: |
         # Create Android SDK directory
-        mkdir -p ~/.buildozer/android/platform/android-sdk
+        mkdir -p $ANDROID_SDK_ROOT
         
         # Download and install Android SDK Command Line Tools
-        cd ~/.buildozer/android/platform/android-sdk
+        cd $ANDROID_SDK_ROOT
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip commandlinetools-linux-11076708_latest.zip
         rm commandlinetools-linux-11076708_latest.zip
@@ -64,25 +68,24 @@ jobs:
         mv cmdline-tools/bin cmdline-tools/latest/
         mv cmdline-tools/lib cmdline-tools/latest/
         
-        # Set environment variables
-        export ANDROID_SDK_ROOT=~/.buildozer/android/platform/android-sdk
-        export ANDROID_HOME=~/.buildozer/android/platform/android-sdk
+        # Set PATH
         export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         
         # Accept SDK licenses
         yes | sdkmanager --licenses
         
-        # Install build-tools
+        # Install required components
         sdkmanager "build-tools;33.0.0"
+        sdkmanager "platform-tools"
+        sdkmanager "platforms;android-33"
         
         # Verify installation
         ls -la $ANDROID_SDK_ROOT/build-tools/
+        ls -la $ANDROID_SDK_ROOT/platform-tools/
         
     - name: Build APK
       run: |
-        # Set environment variables
-        export ANDROID_SDK_ROOT=~/.buildozer/android/platform/android-sdk
-        export ANDROID_HOME=~/.buildozer/android/platform/android-sdk
+        # Set PATH
         export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         
         # Build APK
