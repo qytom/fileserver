@@ -1,6 +1,4 @@
-name: Build Android APK (Optimized)
-
-# Trigger new build attempt
+name: Build Android APK
 
 on:
   push:
@@ -12,11 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    env:
-      ANDROID_SDK_ROOT: /home/runner/android-sdk
-      ANDROID_HOME: /home/runner/android-sdk
-      PATH: "${{ env.PATH }}:/home/runner/android-sdk/cmdline-tools/latest/bin:/home/runner/android-sdk/platform-tools"
     
     steps:
     - name: Checkout repository
@@ -36,32 +29,15 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          git \
-          openjdk-11-jdk \
-          build-essential \
-          python3-dev \
-          python3-pip \
-          libffi-dev \
-          libssl-dev \
-          libxml2-dev \
-          libxslt1-dev \
-          zlib1g-dev \
-          autoconf \
-          libtool \
-          pkg-config \
-          libncurses5-dev \
-          libncursesw5-dev \
-          cmake \
-          libltdl-dev
+        sudo apt-get install -y git openjdk-11-jdk build-essential python3-dev python3-pip libffi-dev libssl-dev libxml2-dev libxslt1-dev zlib1g-dev autoconf libtool pkg-config libncurses5-dev libncursesw5-dev cmake libltdl-dev
         
     - name: Setup Android SDK
       run: |
         # Create Android SDK directory
-        mkdir -p $ANDROID_SDK_ROOT
+        mkdir -p /home/runner/android-sdk
         
         # Download and install Android SDK Command Line Tools
-        cd $ANDROID_SDK_ROOT
+        cd /home/runner/android-sdk
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip commandlinetools-linux-11076708_latest.zip
         rm commandlinetools-linux-11076708_latest.zip
@@ -71,6 +47,10 @@ jobs:
         mv cmdline-tools/bin cmdline-tools/latest/
         mv cmdline-tools/lib cmdline-tools/latest/
         
+        # Set PATH
+        export ANDROID_SDK_ROOT=/home/runner/android-sdk
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+        
         # Accept SDK licenses
         yes | sdkmanager --licenses
         
@@ -79,70 +59,19 @@ jobs:
         sdkmanager "platform-tools"
         sdkmanager "platforms;android-33"
         
-        # Verify installation
-        ls -la $ANDROID_SDK_ROOT/build-tools/
-        ls -la $ANDROID_SDK_ROOT/platform-tools/
-        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/
-        
-        # Create symlink to make buildozer happy
+        # Create symlink for buildozer
         mkdir -p /home/runner/.buildozer/android/platform/
-        ln -s $ANDROID_SDK_ROOT /home/runner/.buildozer/android/platform/android-sdk
+        ln -s /home/runner/android-sdk /home/runner/.buildozer/android/platform/android-sdk
         
-        # Verify symlink
-        ls -la /home/runner/.buildozer/android/platform/
+        # Verify installation
+        ls -la /home/runner/android-sdk/build-tools/
         ls -la /home/runner/.buildozer/android/platform/android-sdk/build-tools/
         
     - name: Build APK
       run: |
-        # Build APK
+        export ANDROID_SDK_ROOT=/home/runner/android-sdk
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         buildozer android debug 2>&1 | tee build.log
-        echo "Build completed with exit code: $?"
-        
-    - name: List all files and directories
-      run: |
-        echo "=== Current directory ==="
-        pwd
-        ls -la
-        echo ""
-        echo "=== All directories ==="
-        find . -type d -name ".buildozer" -o -name "bin" | head -20
-        echo ""
-        echo "=== Searching for APK files ==="
-        find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
-        echo ""
-        echo "=== Listing .buildozer directory ==="
-        if [ -d ".buildozer" ]; then
-          ls -la .buildozer/
-          echo ""
-          echo "=== Listing .buildozer/android directory ==="
-          if [ -d ".buildozer/android" ]; then
-            ls -la .buildozer/android/
-            echo ""
-            echo "=== Listing .buildozer/android/platform directory ==="
-            if [ -d ".buildozer/android/platform" ]; then
-              ls -la .buildozer/android/platform/
-              echo ""
-              echo "=== Listing .buildozer/android/platform/build directory ==="
-              if [ -d ".buildozer/android/platform/build" ]; then
-                ls -la .buildozer/android/platform/build/
-                echo ""
-                echo "=== Listing .buildozer/android/platform/build/dists directory ==="
-                if [ -d ".buildozer/android/platform/build/dists" ]; then
-                  ls -la .buildozer/android/platform/build/dists/
-                fi
-              fi
-            fi
-          fi
-        else
-          echo ".buildozer directory not found"
-        fi
-        echo ""
-        echo "=== Listing bin directory ==="
-        if [ -d "bin" ]; then
-          ls -la bin/
-        else
-          echo "bin directory not found"
-        fi
         
     - name: Upload build log
       if: always()
@@ -158,7 +87,4 @@ jobs:
         name: fileserver-apk
         path: |
           .buildozer/android/platform/build/dists/*.apk
-          .buildozer/android/platform/build/outputs/apk/debug/*.apk
           bin/*.apk
-        retention-days: 30
-        if-no-files-found: warn
