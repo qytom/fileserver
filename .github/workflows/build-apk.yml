@@ -14,6 +14,7 @@ jobs:
     env:
       ANDROID_SDK_ROOT: /home/runner/android-sdk
       ANDROID_HOME: /home/runner/android-sdk
+      PATH: "${{ env.PATH }}:/home/runner/android-sdk/cmdline-tools/latest/bin:/home/runner/android-sdk/platform-tools"
     
     steps:
     - name: Checkout repository
@@ -68,9 +69,6 @@ jobs:
         mv cmdline-tools/bin cmdline-tools/latest/
         mv cmdline-tools/lib cmdline-tools/latest/
         
-        # Set PATH
-        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
-        
         # Accept SDK licenses
         yes | sdkmanager --licenses
         
@@ -82,12 +80,18 @@ jobs:
         # Verify installation
         ls -la $ANDROID_SDK_ROOT/build-tools/
         ls -la $ANDROID_SDK_ROOT/platform-tools/
+        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/
+        
+        # Create symlink to make buildozer happy
+        mkdir -p /home/runner/.buildozer/android/platform/
+        ln -s $ANDROID_SDK_ROOT /home/runner/.buildozer/android/platform/android-sdk
+        
+        # Verify symlink
+        ls -la /home/runner/.buildozer/android/platform/
+        ls -la /home/runner/.buildozer/android/platform/android-sdk/build-tools/
         
     - name: Build APK
       run: |
-        # Set PATH
-        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
-        
         # Build APK
         buildozer android debug 2>&1 | tee build.log
         echo "Build completed with exit code: $?"
