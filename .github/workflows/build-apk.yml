@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Optimized)
 
 on:
   push:
@@ -51,20 +51,38 @@ jobs:
     - name: Build APK
       run: |
         buildozer android debug 2>&1 | tee build.log
+        echo "Build completed with exit code: $?"
         
-    - name: List all files and directories
+    - name: Find APK files
+      id: find_apk
       run: |
-        echo "=== Current directory structure ==="
-        ls -la
-        echo ""
         echo "=== Searching for APK files ==="
-        find . -name "*.apk" -type f -exec ls -lh {} \; 2>/dev/null || echo "No APK files found"
-        echo ""
-        echo "=== Listing .buildozer directory ==="
-        ls -la .buildozer/ 2>/dev/null || echo ".buildozer directory not found"
-        echo ""
-        echo "=== Listing .buildozer/android directory ==="
-        ls -la .buildozer/android/ 2>/dev/null || echo ".buildozer/android directory not found"
+        APK_FILES=$(find . -name "*.apk" -type f 2>/dev/null)
+        
+        if [ -z "$APK_FILES" ]; then
+          echo "No APK files found!"
+          echo "apk_found=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+        echo "Found APK files:"
+        echo "$APK_FILES"
+        
+        # Get the first APK file path
+        FIRST_APK=$(echo "$APK_FILES" | head -n 1)
+        echo "First APK: $FIRST_APK"
+        
+        # Get the directory containing the APK
+        APK_DIR=$(dirname "$FIRST_APK")
+        echo "APK directory: $APK_DIR"
+        
+        # List all files in the APK directory
+        echo "Files in APK directory:"
+        ls -la "$APK_DIR"
+        
+        # Set output variables
+        echo "apk_dir=$APK_DIR" >> $GITHUB_OUTPUT
+        echo "apk_found=true" >> $GITHUB_OUTPUT
         
     - name: Upload build log on failure
       if: failure()
@@ -74,12 +92,10 @@ jobs:
         path: build.log
         
     - name: Upload APK files
-      if: success()
+      if: success() && steps.find_apk.outputs.apk_found == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: fileserver-apk
-        path: |
-          .buildozer/android/platform/build/dists/*.apk
-          .buildozer/android/platform/build/outputs/apk/debug/*.apk
-          bin/*.apk
+        path: ${{ steps.find_apk.outputs.apk_dir }}/*.apk
         retention-days: 30
+        if-no-files-found: error
