@@ -50,6 +50,31 @@ jobs:
         sed -i 's/requirements = python3,kivy/requirements = python3,kivy==2.1.0/g' buildozer.spec
         # Show configuration
         cat buildozer.spec
+        # Create buildozer directories
+        mkdir -p /home/runner/.buildozer/android/platform/
+        # Set up Android SDK with license acceptance
+        echo "=== Setting up Android SDK ==="
+        mkdir -p /home/runner/android-sdk
+        cd /home/runner/android-sdk
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-6514223_latest.zip
+        unzip -q commandlinetools-linux-6514223_latest.zip
+        rm commandlinetools-linux-6514223_latest.zip
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/bin cmdline-tools/lib cmdline-tools/source.properties cmdline-tools/latest/
+        # Set environment variables
+        export ANDROID_SDK_ROOT=/home/runner/android-sdk
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+        # Accept all licenses
+        yes | sdkmanager --licenses > /dev/null 2>&1
+        # Install build-tools
+        sdkmanager "build-tools;33.0.0" "platform-tools" "platforms;android-33"
+        # Create symlink for buildozer
+        if [ -L /home/runner/.buildozer/android/platform/android-sdk ]; then
+          rm /home/runner/.buildozer/android/platform/android-sdk
+        fi
+        ln -s /home/runner/android-sdk /home/runner/.buildozer/android/platform/android-sdk
+        # Go back to project directory
+        cd /home/runner/work/fileserver/fileserver/hello_world
         # Build with verbose output
         buildozer android debug -v 2>&1 | tee build.log
         
