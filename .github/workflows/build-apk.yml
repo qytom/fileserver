@@ -59,19 +59,45 @@ jobs:
         sdkmanager "platform-tools"
         sdkmanager "platforms;android-33"
         
-        # Create symlink for buildozer
+        # Create buildozer directories
         mkdir -p /home/runner/.buildozer/android/platform/
+        
+        # Remove existing symlink if it exists
+        if [ -L /home/runner/.buildozer/android/platform/android-sdk ]; then
+          rm /home/runner/.buildozer/android/platform/android-sdk
+        fi
+        
+        # Create symlink for buildozer
         ln -s /home/runner/android-sdk /home/runner/.buildozer/android/platform/android-sdk
         
         # Verify installation
+        echo "=== SDK installation verification ==="
+        ls -la /home/runner/android-sdk/
         ls -la /home/runner/android-sdk/build-tools/
+        ls -la /home/runner/android-sdk/build-tools/33.0.0/
+        echo "=== Buildozer directory verification ==="
+        ls -la /home/runner/.buildozer/android/platform/
+        ls -la /home/runner/.buildozer/android/platform/android-sdk/
         ls -la /home/runner/.buildozer/android/platform/android-sdk/build-tools/
         
     - name: Build APK
       run: |
         export ANDROID_SDK_ROOT=/home/runner/android-sdk
         export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
-        buildozer android debug 2>&1 | tee build.log
+        # Set build-tools version explicitly
+        export ANDROID_HOME=/home/runner/android-sdk
+        # Build with verbose output
+        buildozer android debug -v 2>&1 | tee build.log
+        
+    - name: List files
+      run: |
+        echo "=== Current directory ==="
+        ls -la
+        echo "=== Looking for APK files ==="
+        find . -name "*.apk" -type f
+        find . -name "build" -type d
+        ls -la .buildozer/ 2>/dev/null || echo "No .buildozer directory"
+        ls -la bin/ 2>/dev/null || echo "No bin directory"
         
     - name: Upload build log
       if: always()
@@ -88,3 +114,4 @@ jobs:
         path: |
           .buildozer/android/platform/build/dists/*.apk
           bin/*.apk
+          **/*.apk
