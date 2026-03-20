@@ -48,33 +48,20 @@ jobs:
           cmake \
           libltdl-dev
         
-    - name: Debug - List files
-      run: |
-        echo "Current directory:"
-        pwd
-        echo ""
-        echo "Files in current directory:"
-        ls -la
-        echo ""
-        echo "Checking buildozer.spec:"
-        if [ -f buildozer.spec ]; then
-          echo "buildozer.spec exists"
-          head -n 20 buildozer.spec
-        else
-          echo "buildozer.spec NOT found!"
-        fi
-        
     - name: Build APK
       run: |
         buildozer android debug 2>&1 | tee build.log
         
-    - name: Find APK files
+    - name: Find and list APK files
       run: |
         echo "Searching for APK files..."
-        find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
+        find . -name "*.apk" -type f -exec ls -lh {} \; 2>/dev/null || echo "No APK files found"
         echo ""
-        echo "Listing bin directory:"
-        ls -la bin/ 2>/dev/null || echo "bin directory not found"
+        echo "Listing .buildozer directory:"
+        ls -la .buildozer/ 2>/dev/null || echo ".buildozer directory not found"
+        echo ""
+        echo "Listing .buildozer/android directory:"
+        ls -la .buildozer/android/ 2>/dev/null || echo ".buildozer/android directory not found"
         
     - name: Upload build log on failure
       if: failure()
@@ -89,5 +76,7 @@ jobs:
       with:
         name: fileserver-apk
         path: |
-          bin/*.apk
           .buildozer/android/platform/build/dists/*.apk
+          .buildozer/android/platform/build/outputs/apk/debug/*.apk
+          bin/*.apk
+        if-no-files-found: error
